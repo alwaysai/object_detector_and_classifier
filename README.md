@@ -1,4 +1,4 @@
-# Multiple Object Detector Sample App
+# Object Detection & Classifier Sample App
 This app enables two alwaysAI models to be used simultaneously: one to detect facial objects, and a second to classify the detected faces in terms of age ranges. 
 
 ## Requirements
