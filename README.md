@@ -17,3 +17,5 @@ The facial detection used is the 'alwaysai/res10_300x300_ssd_iter_140000' model,
 
 
 You can alter the code to used different detection and classification models: https://alwaysai.co/docs/application_development/changing_the_model.html
+
+

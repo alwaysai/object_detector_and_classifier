@@ -15,16 +15,16 @@ https://dashboard.alwaysai.co/docs/application_development/changing_the_engine_a
 
 def main():
 
-    # first make a detector to detect facial objects
+    # Step 1b: first make a detector to detect facial objects
     facial_detector = edgeiq.ObjectDetection(
             "alwaysai/res10_300x300_ssd_iter_140000")
     facial_detector.load(engine=edgeiq.Engine.DNN)
 
-    # then make a classifier to classify the age of the image
+    # Step 2a: then make a classifier to classify the age of the image
     classifier = edgeiq.Classification("alwaysai/agenet")
     classifier.load(engine=edgeiq.Engine.DNN)
 
-    # descriptions printed to console
+    # Step 2b: descriptions printed to console
     print("Engine: {}".format(facial_detector.engine))
     print("Accelerator: {}\n".format(facial_detector.accelerator))
     print("Model:\n{}\n".format(facial_detector.model_id))
@@ -45,36 +45,77 @@ def main():
 
             # loop detection
             while True:
+
+                # Step 3a: track how many faces are detected in a frame
+                count = 1
+
+                # read in the video stream
                 frame = video_stream.read()
+
 
                 # detect human faces
                 results = facial_detector.detect_objects(
                         frame, confidence_level=.5)
-                frame = edgeiq.markup_image(
-                        frame, results.predictions, show_labels=False)  
 
-                # generate labels to display the facial detections on the streamer output
+                # Step 3b: altering the labels to show which face was detected
+                for p in results.predictions:
+                    p.label = "Face " + str(count)
+                    count = count + 1
+
+
+
+                # Step 3c: alter the original frame mark up to just show labels
+                frame = edgeiq.markup_image(
+                        frame, results.predictions, show_labels=True, show_confidences=False)
+
+                # generate labels to display the face detections on the streamer
                 text = ["Model: {}".format(facial_detector.model_id)]
                 text.append(
                         "Inference time: {:1.3f} s".format(results.duration))
-                text.append("Objects:")
+
+                # Step 3d:
+                text.append("Faces:")
+
+                # Step 4a: add a counter for the face detection label
+                age_label = 1
 
                 # append each predication to the text output
                 for prediction in results.predictions:
-                    text.append("{}: {:2.2f}%".format(
-                        prediction.label, prediction.confidence * 100))
 
-                # attempt to classify the image in terms of age
-                age_results = classifier.classify_image(frame)
+                    # Step 4b: append labels for face detection & classification
+                    text.append("Face {} ".format(
+                        age_label))
 
-                # if there are predictions for the age classification,
-                # generate these labels for the output stream
-                if age_results.predictions:
-                    text.append("Label: {}, {:.2f}".format(
-                        age_results.predictions[0].label,
-                        age_results.predictions[0].confidence))
-                else:
-                    text.append("No age predication")    
+                    age_label = age_label + 1
+
+                    ## to show confidence, use the following instead of above:
+                    # text.append("Face {}: detected with {:2.2f}% confidence,".format(
+                        #count, prediction.confidence * 100))
+
+                    # Step 4c: cut out the face and use for the classification
+                    face_image = edgeiq.cutout_image(frame, prediction.box)
+
+                    # Step 4d: attempt to classify the image in terms of age
+                    age_results = classifier.classify_image(face_image)
+
+                    # Step 4e: if there are predictions for age classification,
+                    # generate these labels for the output stream
+                    if age_results.predictions:
+                        text.append("is {}".format(
+                            age_results.predictions[0].label,
+                        ))
+                    else:
+                        text.append("No age prediction")
+
+                    ## to append classification confidence, use the following
+                    ## instead of the above if/else:
+
+                    # if age_results.predictions:
+                    #     text.append("age: {}, confidence: {:.2f}\n".format(
+                    #         age_results.predictions[0].label,
+                    #         age_results.predictions[0].confidence))
+                    # else:
+                    #     text.append("No age prediction")
                 
                 # send the image frame and the predictions to the output stream
                 streamer.send_data(frame, text)
