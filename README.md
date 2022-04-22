@@ -20,4 +20,5 @@ You can alter the code to used different detection and classification models: ht
 ## Troubleshooting
 If you are having trouble connecting to your edge device, use the CLI configure command to reset the device. Please see the following page for more details: https://alwaysai.co/docs/reference/cli_commands.html
 
-You can also post questions and comments on our Discord Community at: https://discord.gg/R2uM36U
+You can also post questions and comments on our Discord Community at: https://discord.gg/alwaysai
+
