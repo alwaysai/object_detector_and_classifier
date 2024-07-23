@@ -6,7 +6,7 @@ the detected faces in terms of age groups, and output results to
 shared output stream.
 
 To change the computer vision models, follow this guide:
-https://dashboard.alwaysai.co/docs/application_development/changing_the_model.html
+https://docs.alwaysai.co/application_development/application_configuration.html#change-the-computer-vision-model
 
 To change the engine and accelerator, follow this guide:
 https://docs.alwaysai.co/application_development/application_configuration.html#change-the-engine-and-accelerator
